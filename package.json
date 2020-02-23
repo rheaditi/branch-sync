@@ -9,6 +9,7 @@
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
+    "prepack": "npm run build",
     "pack": "ncc build",
     "lint": "eslint src/**/*.ts",
     "test": "jest",
