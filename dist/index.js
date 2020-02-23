@@ -1352,29 +1352,25 @@ exports.isProductionBranch = (branch) => branch === 'production';
 exports.executeCommand = (command, args = [], options = Object.create(null)) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     let output = '';
-    let error = '';
-    const execOptions = Object.assign(Object.assign({}, options), { listeners: Object.assign(Object.assign({}, ((_a = options.listeners) !== null && _a !== void 0 ? _a : {})), { stdout: (data) => {
+    const execOptions = Object.assign(Object.assign({}, options), { failOnStdErr: true, listeners: Object.assign(Object.assign({}, ((_a = options.listeners) !== null && _a !== void 0 ? _a : {})), { stdout: (data) => {
                 var _a;
                 output += data.toString();
                 if (typeof ((_a = options.listeners) === null || _a === void 0 ? void 0 : _a.stdout) === 'function') {
                     options.listeners.stdout(data);
                 }
-            }, stderr: (data) => {
-                var _a;
-                error += data.toString();
-                if (typeof ((_a = options.listeners) === null || _a === void 0 ? void 0 : _a.stderr) === 'function') {
-                    options.listeners.stderr(data);
-                }
             } }) });
-    const exitCode = yield exec_1.exec(command, args, execOptions);
-    return [exitCode, output, error];
+    yield exec_1.exec(command, args, execOptions);
+    return output;
 });
 exports.getCurrentReleaseBranch = () => __awaiter(void 0, void 0, void 0, function* () {
-    const [exitCode, output, error] = yield exports.executeCommand(`git show ${constants_1.DEFAULT_BRANCH}:${constants_1.PROPERTIES_FILE}`);
-    if (exitCode !== 0) {
-        core_1.debug(`exitCode: ${exitCode}, error: ${error}`);
-        throw new Error(error);
-    }
+    exec_1.exec('git', ['fetch', 'origin', `${constants_1.DEFAULT_BRANCH}:${constants_1.DEFAULT_BRANCH}`], {
+        failOnStdErr: true,
+    });
+    const output = yield exports.executeCommand(`git`, [
+        'show',
+        constants_1.DEFAULT_BRANCH,
+        constants_1.PROPERTIES_FILE,
+    ]);
     const properties = output
         .trim()
         .split('\n')
@@ -1382,7 +1378,7 @@ exports.getCurrentReleaseBranch = () => __awaiter(void 0, void 0, void 0, functi
     const releaseProperty = properties.find(([key]) => key === constants_1.RELEASE_BRANCH_PROPERTY);
     if (!releaseProperty) {
         core_1.debug(`unable to find ${constants_1.RELEASE_BRANCH_PROPERTY} property`);
-        throw new Error(error);
+        throw new Error('Failed to find release branch');
     }
     const branch = releaseProperty[1];
     return branch;

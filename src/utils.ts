@@ -22,12 +22,12 @@ export const executeCommand = async (
   command: string,
   args: string[] = [],
   options: ExecOptions = Object.create(null)
-): Promise<[number, string, string]> => {
+): Promise<string> => {
   let output = '';
-  let error = '';
 
   const execOptions: ExecOptions = {
     ...options,
+    failOnStdErr: true,
     listeners: {
       ...(options.listeners ?? {}),
       stdout: (data: Buffer) => {
@@ -36,26 +36,22 @@ export const executeCommand = async (
           options.listeners.stdout(data);
         }
       },
-      stderr: (data: Buffer) => {
-        error += data.toString();
-        if (typeof options.listeners?.stderr === 'function') {
-          options.listeners.stderr(data);
-        }
-      },
     },
   };
-  const exitCode = await exec(command, args, execOptions);
-  return [exitCode, output, error];
+  await exec(command, args, execOptions);
+  return output;
 };
 
 export const getCurrentReleaseBranch = async (): Promise<string> => {
-  const [exitCode, output, error] = await executeCommand(
-    `git show ${DEFAULT_BRANCH}:${PROPERTIES_FILE}`
-  );
-  if (exitCode !== 0) {
-    debug(`exitCode: ${exitCode}, error: ${error}`);
-    throw new Error(error);
-  }
+  exec('git', ['fetch', 'origin', `${DEFAULT_BRANCH}:${DEFAULT_BRANCH}`], {
+    failOnStdErr: true,
+  });
+
+  const output = await executeCommand(`git`, [
+    'show',
+    DEFAULT_BRANCH,
+    PROPERTIES_FILE,
+  ]);
 
   const properties = output
     .trim()
@@ -67,10 +63,9 @@ export const getCurrentReleaseBranch = async (): Promise<string> => {
 
   if (!releaseProperty) {
     debug(`unable to find ${RELEASE_BRANCH_PROPERTY} property`);
-    throw new Error(error);
+    throw new Error('Failed to find release branch');
   }
 
   const branch: string = releaseProperty[1];
-
   return branch;
 };
