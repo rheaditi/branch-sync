@@ -12,7 +12,7 @@ import {
   isReleaseBranch,
 } from './utils';
 
-const branch: string = branchFromRef(getInput('changed-branch'));
+const branch: string = branchFromRef(getInput('current-branch'));
 let currentReleaseBranch: string | null = null;
 const gitOptions = {
   failOnStdErr: true,
@@ -40,7 +40,7 @@ const mergeBranch = async (
 };
 
 // act
-debug(`triggered on branch: ${branch}`);
+debug(`triggered on branch: "${branch}"`);
 
 if (isProductionBranch(branch)) {
   debug('detected "production" branch');
@@ -55,9 +55,7 @@ if (isProductionBranch(branch)) {
   } else {
     debug(`invalid release branch: "${currentReleaseBranch}"`);
   }
-}
-
-if (isReleaseBranch(branch)) {
+} else if (isReleaseBranch(branch)) {
   debug('detected release branch');
 
   group(`merge ${branch} → ${DEFAULT_BRANCH}`, async () => {
@@ -65,6 +63,8 @@ if (isReleaseBranch(branch)) {
 
     mergeBranch(branch, DEFAULT_BRANCH);
   });
+} else {
+  debug(`Unknown branch "${branch}" - no-op.`);
 }
 
 process.on('uncaughtException', error => {
