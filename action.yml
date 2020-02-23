@@ -1,10 +1,19 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'branch-sync'
+description: 'Fast-forward merge one branch into another'
+author: 'rheaditi'
 inputs:
-  myInput:              # change this
-    description: 'input description here'
-    default: 'default value if applicable'
+  target-branch:
+    description: '
+      Branch to checkout & merge INTO.
+      This is the branch which will get updated.
+      Changes will be pushed to this branch.
+      '
+    required: true
+  upstream-branch:
+    description: '
+      Changes from this branch will be merged into the target branch.
+      This branch will not be mutated.'
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'
