@@ -5,6 +5,7 @@
   "description": "TypeScript template action",
   "main": "lib/main.js",
   "scripts": {
+    "prebuild": "rm -rf lib",
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
