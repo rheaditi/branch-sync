@@ -10,7 +10,7 @@ import {
 } from './constants';
 
 export const branchFromRef = (ref: string): string =>
-  ref.replace(/^origin\//, '');
+  ref.replace(/^origin\//, '').replace(/^refs\/heads\//, '');
 
 export const isReleaseBranch = (branch: string): boolean =>
   RELEASE_BRANCH_PATTERN.test(branch);

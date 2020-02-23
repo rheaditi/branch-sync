@@ -1343,7 +1343,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const exec_1 = __webpack_require__(986);
 const core_1 = __webpack_require__(470);
 const constants_1 = __webpack_require__(32);
-exports.branchFromRef = (ref) => ref.replace(/^origin\//, '');
+exports.branchFromRef = (ref) => ref.replace(/^origin\//, '').replace(/^refs\/heads\//, '');
 exports.isReleaseBranch = (branch) => constants_1.RELEASE_BRANCH_PATTERN.test(branch);
 exports.isProductionBranch = (branch) => branch === 'production';
 exports.executeCommand = (command, args = [], options = Object.create(null)) => __awaiter(void 0, void 0, void 0, function* () {
