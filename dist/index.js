@@ -983,7 +983,7 @@ const exec_1 = __webpack_require__(986);
 const constants_1 = __webpack_require__(32);
 // utils
 const utils_1 = __webpack_require__(611);
-const branch = utils_1.branchFromRef(core_1.getInput('changed-branch'));
+const branch = utils_1.branchFromRef(core_1.getInput('current-branch'));
 let currentReleaseBranch = null;
 const gitOptions = {
     failOnStdErr: true,
@@ -1004,7 +1004,7 @@ const mergeBranch = (source, destination, push = true) => __awaiter(void 0, void
     }));
 });
 // act
-core_1.debug(`triggered on branch: ${branch}`);
+core_1.debug(`triggered on branch: "${branch}"`);
 if (utils_1.isProductionBranch(branch)) {
     core_1.debug('detected "production" branch');
     core_1.group(`get current release branch`, () => __awaiter(void 0, void 0, void 0, function* () {
@@ -1018,12 +1018,15 @@ if (utils_1.isProductionBranch(branch)) {
         core_1.debug(`invalid release branch: "${currentReleaseBranch}"`);
     }
 }
-if (utils_1.isReleaseBranch(branch)) {
+else if (utils_1.isReleaseBranch(branch)) {
     core_1.debug('detected release branch');
     core_1.group(`merge ${branch} → ${constants_1.DEFAULT_BRANCH}`, () => __awaiter(void 0, void 0, void 0, function* () {
         exec_1.exec('git', ['checkout', constants_1.DEFAULT_BRANCH], gitOptions);
         mergeBranch(branch, constants_1.DEFAULT_BRANCH);
     }));
+}
+else {
+    core_1.debug(`Unknown branch "${branch}" - no-op.`);
 }
 process.on('uncaughtException', error => {
     core_1.debug(`error-name: ${error.name}`);
